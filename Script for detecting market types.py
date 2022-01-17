@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[21]:
-
-
 # This tool collects the market type of LSE listed companies from the LSE website, something that can't be easily downloaded
 # For example, on the website for Domino's: https://www.londonstockexchange.com/stock/DOM/domino-s-pizza-group-plc/company-page
 # Under 'Instrument information' it is recorded as 'Main Market'
