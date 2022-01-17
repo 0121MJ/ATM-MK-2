@@ -1,3 +1,5 @@
+# One of the first python projects I did, this simulates an ATM (which also happens to issue loans) in the console
+
 from decimal import * 
 balance = 100
 
