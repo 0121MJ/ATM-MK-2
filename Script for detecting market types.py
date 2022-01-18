@@ -1,5 +1,5 @@
 # This tool collects the market type of LSE listed companies from the LSE website, something that can't be easily downloaded
-# For example, on the page for Domino's pizza group PLC: https://www.londonstockexchange.com/stock/DOM/domino-s-pizza-group-plc/company-page
+# For example, on the website for Domino's: https://www.londonstockexchange.com/stock/DOM/domino-s-pizza-group-plc/company-page
 # Under 'Instrument information' it is recorded as 'Main Market'
 
 import requests
@@ -36,19 +36,36 @@ while a < len(col): # iterates through the companies the user uploaded
 
     
     # clicks accept on the automatic GDPR notice 
-    time.sleep(1) # one second for all the elements to load; script doesn't work without it
-    gdpr = driver.find_elements_by_id("ccc-notify-accept")
-    gdpr[0].click()
-
-    
+    time.sleep(0.5) # one second for all the elements to load; script doesn't work without it
+    try:
+        gdpr = driver.find_elements_by_id("ccc-notify-accept")
+        gdpr[0].click()
+    except:
+        for i in range(5):
+            try:
+                time.sleep(0.5)
+                gdpr[0].click()
+                break
+            except:
+                found = False
+                pass
+   
+        
     # goes through the search results and finds links with the company name in it, clicking on the first result
     search = driver.find_elements_by_xpath('//*[contains(text(), " {} ")]'.format(company_name))    
-    time.sleep(1)
+    time.sleep(0.5)
     try: # if the company cannot be found then it is recorded as so, then passing on to the next company
         search[0].click()
-    except IndexError:
-        found = False
-        pass
+    except:
+        for i in range(5):
+            try:
+                time.sleep(0.5)
+                search[0].click()
+                break
+            except:
+                found = False
+                pass
+
     
     if found == True: # if it finds the company's page then it records the url
         url.append(driver.current_url)
@@ -61,6 +78,9 @@ while a < len(col): # iterates through the companies the user uploaded
     
     a += 1
 
+for i in url:
+    print(url)
+    
 # this section detects which companies are listed as AIM or Main Market, now their URLs are collected
 book = []
 record = []
@@ -85,4 +105,3 @@ for j in url:
 print(record)
 df = pd.DataFrame(record)      
 df.to_excel("output_file.xlsx")
-
