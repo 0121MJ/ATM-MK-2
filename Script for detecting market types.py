@@ -36,11 +36,11 @@ while a < len(col): # iterates through the companies the user uploaded
 
     
     # clicks accept on the automatic GDPR notice 
-    time.sleep(0.5) # one second for all the elements to load; script doesn't work without it
+    time.sleep(0.5) # half second for all the elements to load; testing shows the script doesn't work without it
     try:
         gdpr = driver.find_elements_by_id("ccc-notify-accept")
         gdpr[0].click()
-    except:
+    except: # if it can't open a link, it will retry 5 times before acquiescing
         for i in range(5):
             try:
                 time.sleep(0.5)
