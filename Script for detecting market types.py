@@ -19,6 +19,23 @@ col = df["Company Name"].tolist()
 
 a = 0
 
+#### routine for detecting small cap firms
+response = requests.get("https://www.sharecast.com/index/FTSE_Small_Cap")
+soup = BeautifulSoup(response.text, 'lxml')
+market_cap = soup.find_all("td", class_="text-right xs-col-2 nth-order-5 capitalization-ttl")
+
+thing = []
+
+for i in market_cap:
+    entry = i.get_text().replace('\n','').replace('£','').replace('m','').strip()
+    thing.append(float(entry))
+
+largest_firm = max(thing)
+print(f"The largest SmallCap firm is worth £{largest_firm}m")
+####
+
+search_error_counter = 0
+
 while a < len(col): # iterates through the companies the user uploaded
 
     company_name = col[a]
@@ -65,43 +82,75 @@ while a < len(col): # iterates through the companies the user uploaded
             except:
                 found = False
                 pass
-
     
     if found == True: # if it finds the company's page then it records the url
         url.append(driver.current_url)
     elif found == False:
         url.append("https://www.blank.org/") # if it can't find it then it records a blank website 
-    
+        
+                                   
+    # sometimes a valid company gets caught on the search page, in which case this makes it retry
+    if driver.current_url[37] == "e" and search_error_counter < 3: # this is a characteristic of the search page, part of forcing it to retry
+        search_error_counter += 1
+        url.pop()
+        found = True
+        driver.close()
+        continue
+    else:
+        a += 1
+        
     found = True
+        
+    print(driver.current_url)
     
     driver.close()
     
-    a += 1
+    search_error_counter = 0
 
-for i in url:
-    print(url)
+    
+print("The URLs for the companies on the LSE website were:")
+for a in url:
+    print(a)
     
 # this section detects which companies are listed as AIM or Main Market, now their URLs are collected
 book = []
 record = []
+counter = 0
 
 for j in url:
-    response = requests.get(j)
-    soup = BeautifulSoup(response.text, 'lxml')
-    market_type = soup.find_all("app-index-item", class_="index-item")
     
-    for i in market_type:
-        book.append(i.text)
-    if j == "https://www.blank.org/":
-        record.append("Company not found on LSE website")
-    elif " Market Main Market" in book:
-        record.append("Main Market")
-    elif " Market AIM" in  book:
-        record.append("AIM")
-    else:
-        record.append("Company in LSE website but market not found")
-    book = []
+    for k in range(6): # five attempts of getting the market type before giving up
+        book = []
+        response = requests.get(j)
+        soup = BeautifulSoup(response.text, 'lxml')
+        market_type = soup.find_all("app-index-item", class_="index-item")
+        
+        for i in market_type:
+            book.append(i.text)
+            
+        if j == "https://www.blank.org/":
+            record.append("Company not found on LSE website")
+            break
+            
+        elif " Market Main Market" in book:
+            collection = soup.find_all("div", class_="bold-font-weight regular-font-size")
+            company_mc = float(collection[5].getText().replace(',',''))
+            if company_mc <= largest_firm:
+                record.append("Small Cap")
+            else:
+                record.append("Main Market")
+            break
+            
+        elif " Market AIM" in  book:
+            record.append("AIM")
+            break
+            
+        elif k == 5:
+            record.append("Company in LSE website but market not found")
+        print(f"Company {counter} not found, {k}/5 attempts")
+        
+    counter += 1
 
 print(record)
-df = pd.DataFrame(record)      
+df = pd.DataFrame(record)
 df.to_excel("output_file.xlsx")
