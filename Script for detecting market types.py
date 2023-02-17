@@ -32,7 +32,7 @@ for i in market_cap:
 
 largest_firm_cap = max(sc_firms_marketcap)
 
-#this webpage isn't as reliable as the previous so a try/except is used here
+# this webpage isn't as reliable as the previous so a try/except is used here
 try:
     response = requests.get("https://www.sharecast.com/index/FTSE_Small_Cap/market-capitalization/desc")
     soup = BeautifulSoup(response.text, 'lxml')
@@ -132,7 +132,7 @@ print("\nNow determining market types...")
 
 
 ### this routine verifies that a detected smallcap firm is indeed found on the index or not
-#using the official LSE index, not used elsewhere because it doesn't store the market caps
+# using the official LSE index, not used elsewhere because it doesn't store the market caps
 SC_index = ["https://www.hl.co.uk/shares/stock-market-summary/ftse-small-cap?page=1",
             "https://www.hl.co.uk/shares/stock-market-summary/ftse-small-cap?page=2",
             "https://www.hl.co.uk/shares/stock-market-summary/ftse-small-cap?page=3"]
@@ -174,7 +174,7 @@ for j in url:
             company_mc = float(collection[5].getText().replace(',',''))
             
             if company_mc <= largest_firm_cap:
-                #this gets the name of the current firm from the URL and checks if it's in the list of SC firms
+                # this gets the name of the current firm from the URL and checks if it's in the list of SC firms
                 potential_smallcap = j.replace("/company-page",'')
                 potential_smallcap = potential_smallcap.split('/')
                 potential_smallcap = potential_smallcap[5]
